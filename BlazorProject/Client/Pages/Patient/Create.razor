@@ -1,0 +1,65 @@
+﻿@page "/Patient/Create"
+@using BlazorProject.Shared.Models;
+@using BlazorProject.Shared.DTO
+@using Blazored.Toast.Services
+@using System.Net.Http.Json;
+@inject HttpClient http
+@inject IToastService toastService
+@inject NavigationManager NavigationManager
+
+
+<div class="row bg-light shadow justify-content-center">
+    <div class="col-12">
+        <h3 class="text-center fw-bold text-secondary mb-4 mt-4">Create Patient</h3>
+        <EditForm Model="@patient" OnValidSubmit="SavePatient">
+
+            <DataAnnotationsValidator />
+            <div class="form-group row mb-2 mt-4">
+
+                <label class="col-form-label fw-bold text-secondary col-4 text-end" for="@patient.PatientName">Patient name</label>
+                <div class="col-6">
+                    <InputText @bind-Value="patient.PatientName" class="form-control" />
+                    <ValidationMessage For="@(()=>patient.PatientName)" class="text-danger" />
+                </div>
+            </div>
+            <div class="form-group row mb-1">
+                <label class="col-form-label fw-bold text-secondary col-4 text-end" for="@patient.Address">Address</label>
+                <div class="col-6">
+                    <InputTextArea @bind-Value="patient.Address" class="form-control" />
+                    <ValidationMessage For="@(()=>patient.Address)" class="text-danger" />
+                </div>
+            </div>
+            <div class="form-group row mb-1">
+                <label class="col-form-label fw-bold text-secondary col-4 text-end" for="@patient.Email">Email</label>
+                <div class="col-6">
+                    <InputText @bind-Value="patient.Email" class="form-control" />
+                    <ValidationMessage For="@(()=>patient.Email)" class="text-danger" />
+                </div>
+            </div>
+            <div class="form-group row mb-4">
+
+                <div class="col-9 offset-1 mt-3 d-flex justify-content-between">
+
+                    <a href="/Patients/List" class="btn btn-link shadow">Back to list</a>
+                    <button type="submit" class="btn btn-outline-primary shadow btn-sm">Save</button>
+
+                </div>
+            </div>
+        </EditForm>
+    </div>
+
+</div>
+
+@code {
+    private Patient patient = new();
+    private async Task SavePatient()
+    {
+        var respose = await http.PostAsJsonAsync("api/Patients", patient);
+        if (respose.IsSuccessStatusCode)
+        {
+            toastService.ShowSuccess("Data saved successsfully");
+            patient = new();
+            NavigationManager.NavigateTo("/Patients/List");
+        }
+    }
+}

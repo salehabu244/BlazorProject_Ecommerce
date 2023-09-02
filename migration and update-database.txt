@@ -1,0 +1,5 @@
+add-migration ScriptA -context ApplicationDbContext
+add-migration ScriptA -context MedicineDbContext
+
+update-database -context ApplicationDbContext
+update-database -context MedicineDbContext

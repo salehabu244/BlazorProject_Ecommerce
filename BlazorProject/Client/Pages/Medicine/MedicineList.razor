@@ -1,0 +1,70 @@
+﻿@page "/Medicines/List"
+@attribute [Authorize]
+@using BlazorProject.Shared.Models;
+@using Microsoft.AspNetCore.Authorization;
+@inject HttpClient http
+@inject IToastService toastService
+<div class="row justify-content-center">
+    <div class="col-10 ">
+        <h3 class="text-center fw-bold text-secondary bg-success-subtle">Product List</h3>
+        
+        @if (medicine is null)
+        {
+            <div>Loading...</div>
+        }
+        else
+        {
+            <table class="table table-bordered table-striped table-responsive-sm table-hover shadow bg-body-secondary">
+                <thead class="table-primary">
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Available?</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in medicine)
+                    {
+                        <tr>
+                            <td width="70" height="50"><img src="/Uploads/@p.Picture" class="rounded  border-secondary " style="width:45px; border:solid;border-image-slice:fill;margin-left:4px;" /></td>
+                            <td>@p.MedicineName</td>
+                            <td>@p.Price.ToString("0.00")</td>
+                            <td>@(p.IsAvailable ? "Yes" : "No")</td>
+                            <td width="100">
+                                <a class="btn btn-outline-success shadow-sm btn-sm" href="/Medicines/edit/@p.MedicineID"><i class="bi bi-pencil"></i></a>
+                                <button @onclick="@( ()=>Delete(p.MedicineID))" class="btn btn-outline-danger shadow-sm btn-sm"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        <div class="d-flex justify-content-end mb-2">
+            <a class="btn btn-outline-primary shadow-lg btn-lg rounded-circle" href="/Products/Create"><i class="bi bi-plus"></i></a>
+        </div>
+    </div>
+</div>
+
+@code {
+    private Medicine[]? medicine;
+    protected override async Task OnInitializedAsync()
+    {
+        medicine = await http.GetFromJsonAsync<Medicine[]>("api/Medicines");
+    }
+    private async Task Delete(int id)
+    {
+        var response = await http.DeleteAsync($"api/Medicines/{id}");
+        if (response.IsSuccessStatusCode)
+        {
+            toastService.ShowWarning("Data deleted successfully");
+            medicine = await http.GetFromJsonAsync<Medicine[]>("api/Medicines");
+
+        }
+        else
+        {
+            toastService.ShowError("Failed to delete data.");
+        }
+    }
+}
